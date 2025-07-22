@@ -8,6 +8,7 @@
 :root{
     --tenne-tawny: #ff355e;
     --tenne-tawny-dark: #df0047;
+    --tenne-tawny-light: #ff6887;
     --frosting: #fcf7ed;
     --cocoa: #301B28;
     --chocolate: #523634;
@@ -37,16 +38,25 @@ body.dark-mode{
     --modalCardBg: rgba(18, 18, 18, 0.75);
 
 }
-h3{
-
+body.modal-open{
+    overflow: hidden;
 }
-
+html {
+  scroll-padding-top: 110px; /* Match or slightly more than .letter-bar-wrapper height */
+}
 .btn{
     font-family: inherit;
     cursor: pointer;
     outline: 0;
     font-size: 1.05rem;
 }
+
+.each-ingredient-btn{
+    display: block;
+    color: var(--text-color);
+    text-decoration: none;
+}
+
 .text{
     opacity: 0.8;
 }
@@ -79,6 +89,50 @@ h3{
 }
 .container{
     min-height: 100vh;
+}
+.ingredient-results {
+  width: 100%;
+  display: block;
+}
+
+.ingredient-group {
+  width: 100%;
+  display: block;
+}
+.letter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin: 1rem 0;
+  padding: 0.5rem;
+  background: var(--card-bg);
+  border-radius: 10px;
+  
+}
+.letter-bar-wrapper {
+  width: 100%;
+  //margin-bottom: 1rem;
+  display: none;
+  position:sticky;
+  z-index: 10;
+  top:0;
+  //padding: 0.5rem 1rem;
+  //border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  //box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  
+}
+.letter-link{
+  text-decoration: none;
+  color: var(--text-color);
+  font-weight: bold;
+  font-size: 1.1rem;
+  padding: 0.3rem 0.6rem;
+  transition: background 0.2s;
+}
+.letter-link:hover, .highlight-letter {
+  background: var(--tenne-tawny);
+  color: white;
 }
 .meal-wrapper{
     max-width: 1280px;
@@ -236,7 +290,6 @@ h3{
     overflow-y: scroll;
     display: none;
     z-index: 999;
-    //opacity:0;
 }
 .meal-details::-webkit-scrollbar {
     width: 10px;
@@ -249,14 +302,17 @@ h3{
     -o-border-radius: 2rem;
     -ms-border-radius: 2rem;
 }
-
+.notFound{
+    grid-column: 1 / -1;
+    text-align: center;
+    width: fit-content;
+}
 /*js relared*/
 .showRecipe{
     display: block;
 }
 .centerDIV.showRecipe .meal-details {
   transform: translate(-50%, -50%) scale(1);
- // opacity: 1;
 }
 .meal-details-content{
     height:100%;
@@ -324,6 +380,22 @@ h3{
     justify-content: center;
     align-items: center;
 }
+.ingredient-group{
+    grid-column: 1 / -1;
+    display: inline-block;
+    position: relative;
+    padding: 0.5rem 1rem;
+    margin-top: 2rem;
+    margin-bottom: 0.5rem;
+    font-size: 1.5rem;
+    font-weight: bold;
+    padding-bottom: 0.5rem;
+    color: white;
+    background-color: var(--tenne-tawny-light);
+    text-align: left;
+    width:100%;
+}
+
 .recipe-category{
     color: #fff;
     font-weight: 600;
@@ -407,6 +479,14 @@ ul{
     transition: opacity 0.3s ease;
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
+    opacity: 0;
+}
+.centerDIV.showRecipe {
+  opacity: 1;
+}
+
+.centerDIV.hideRecipe {
+  opacity: 0;
 }
 .showRecipe {
   animation: fadeIn 0.25s ease-in-out;

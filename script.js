@@ -41,11 +41,23 @@ mealList.addEventListener("click", function (e) {
 
 
 window.addEventListener('click', function(e) {
-    if(mealDetailsContent.parentElement.classList.contains("showRecipe") && !mealDetailsCard.contains(e.target)) {
-        mealDetailsContent.parentElement.classList.remove("showRecipe");
-        document.getElementsByClassName("centerDIV")[0].style.display = 'none';
-    }
-})
+  if (
+    mealDetailsContent.parentElement.classList.contains("showRecipe") &&
+    !mealDetailsCard.contains(e.target)
+  ) {
+    closeModal();
+    document.body.classList.remove("modal-open");
+  }
+});
+window.addEventListener("keydown", function (e) {
+  console.log("Key pressed:", e.key);
+
+  if (e.key === "Escape") {
+    closeModal();
+    document.body.classList.remove("modal-open");
+  }
+});
+
 
 function checkIfFavorited(id) {
   const favorites = JSON.parse(localStorage.getItem("favorites")) || [];
@@ -87,6 +99,7 @@ function createMealHTML(data){
 
 // Get meal list that matches with the ingredients
 function getMealList() {
+    
     let searchInputTxt = document.getElementById("search-input").value.trim();
     document.getElementById("result-label").textContent = `Meals with ingredient: ${searchInputTxt}`;
 
@@ -94,6 +107,8 @@ function getMealList() {
         .then(response => response.json())
         .then(data => {
 	    lastMealData = data; // <--- store data
+            document.querySelector(".letter-bar-wrapper").style.display = "none";
+      
             mealList.innerHTML = createMealHTML(data);
 
 	    categoryBtn.classList.remove("active-btn");
@@ -110,6 +125,7 @@ function getMealList() {
 
 // Get category list
 function getCateogryList() {
+    
     document.getElementById("result-label").textContent = `Meal Categories`;
 
     fetch(`https://www.themealdb.com/api/json/v1/1/categories.php`)
@@ -132,6 +148,8 @@ function getCateogryList() {
                 });
                 mealList.classList.remove("notFound");
             }
+            document.querySelector(".letter-bar-wrapper").style.display = "none";
+
             mealList.innerHTML = html;
 
 	    categoryBtn.classList.add("active-btn");
@@ -160,6 +178,8 @@ function getAreaList() {
                 });
                 mealList.classList.remove("notFound");
             }
+            document.querySelector(".letter-bar-wrapper").style.display = "none";
+
             mealList.innerHTML = html;
 
 	    categoryBtn.classList.remove("active-btn");
@@ -177,21 +197,58 @@ function getIngredientList() {
         .then(data => {
             let html = "";
             let link = "";
+            let currentLetterSelected = "A"; // Default letter
+
+            link +=`<div class="letter-bar">`;
+            for (let i = 65; i <= 90; i++) { 
+              let letter= String.fromCharCode(i);
+                link+= `<a href="#" class="letter-link" data-letter="${letter}" id="letter-link-${letter}">${letter}</a>`;
+            }
+            link += `</div>`;
+            document.querySelector(".letter-bar-wrapper").style.display = "block";
+            document.querySelector(".letter-bar").innerHTML = link;
+            
+            document.querySelectorAll(".letter-link").forEach(link => {
+              link.addEventListener("click", (e) => {
+                  e.preventDefault();
+                  const letter = e.target.dataset.letter;
+                  const target = document.getElementById(`group-${letter}`);
+                  
+                  document.getElementById(`letter-link-${currentLetterSelected}`).classList.remove("highlight-letter");
+
+                  currentLetterSelected = letter;
+                  
+                  if (target) {
+                      document.getElementById(`letter-link-${letter}`).classList.add("highlight-letter");
+                      target.scrollIntoView({ behavior: "smooth", block: "start" });
+                  }
+              });
+            });
+
+
+
             if(data.meals) {
+                data.meals.sort((a,b) =>a.strIngredient.localeCompare(b.strIngredient));
+            
+            let currentLetter="";
+                
                 data.meals.forEach(ingredient => {
-                    link = "https://www.themealdb.com/images/ingredients/" 
-                    +ingredient.strIngredient.split(' ').join('_')
-                    +".png";
+                    const firstLetter = ingredient.strIngredient.charAt(0).toUpperCase();
+                    if (firstLetter !== currentLetter) {
+                      currentLetter = firstLetter;
+                      html+=`<h2 class ="ingredient-group" id="group-${currentLetter}">${currentLetter}</h2>`;
+                      
+                    }
+
 
                     html += `
                         <div class="meal-item">
-                            <div class="meal-img">
-                                <img src=${link} alt="food">
-                            </div>
-                            <div class="ingredient-name" data-id="${ingredient.strIngredient}">
-                                <h3>${ingredient.strIngredient}</h3>
-                                <a href="#" class="each-ingredient-btn show-btn">Show Recipes</a>
-                            </div>
+                                <a href="#" class="each-ingredient-btn" data-ingredient="${ingredient.strIngredient}">
+                                  <div class="ingredient-name" data-id="${ingredient.strIngredient}">
+                                  <h3>${ingredient.strIngredient}</h3>
+                                  </div>
+
+                                </a>
                         </div>    
                     `;
                 });
@@ -208,7 +265,7 @@ function getIngredientList() {
 function getMealsbyIngredient(e) {
 
     e.preventDefault();
-    if (e.target.classList.contains("each-ingredient-btn")) {
+    if (e.target.closest(".each-ingredient-btn")) {
         console.log("Ingredient button clicked");
         let mealItem = e.target.parentElement;
         document.getElementById("result-label").textContent = `Meals with ingredients: ${mealItem.dataset.id}`;
@@ -217,7 +274,11 @@ function getMealsbyIngredient(e) {
             .then(response => response.json())
             .then(data => {
             lastMealData = data; // <--- store data
+            if (!data.meals) {
+              mealList.innerHTML = `<p class="notFound">Sorry, no items found</p>`;
+            } else {
             mealList.innerHTML = createMealHTML(data);
+          }
 
         });
     }
@@ -278,9 +339,16 @@ function getMealsbyCategory(e) {
 }
 // Create a modal to show recipe
 function mealRecipeModal(meal) {
-    console.log(meal);
-    //meal = meal[0];
-    document.getElementsByClassName("centerDIV")[0].style.display = 'flex';
+    const overlay = document.querySelector(".centerDIV");
+
+  overlay.style.display = 'flex'; // show overlay first
+
+  requestAnimationFrame(() => {
+    overlay.classList.remove("hideRecipe"); // clear old fade-out
+    overlay.classList.add("showRecipe"); // trigger fade-in
+  });
+  document.body.classList.add("modal-open");
+
     let ingredients = "";
     for (let i = 1; i <= 20; i++) {
         const ingredient = meal[`strIngredient${i}`];
@@ -325,7 +393,6 @@ function mealRecipeModal(meal) {
 
 document.getElementById("view-favorites-btn").addEventListener("click", function () {
   const favorites = JSON.parse(localStorage.getItem("favorites")) || [];
-
   if (favorites.length === 0) {
     mealList.innerHTML = "<p>You haven't added any favorites yet.</p>";
     return;
@@ -351,7 +418,8 @@ document.getElementById("view-favorites-btn").addEventListener("click", function
       </div>
     `;
   });
-
+  document.querySelector(".letter-bar-wrapper").style.display = "none";
+  
   mealList.innerHTML = html;
   document.getElementById("result-label").textContent = "Your Favorite Meals";
 });
@@ -414,22 +482,6 @@ function saveToFavorites(id, name, thumb) {
   }
 }
 
-window.addEventListener("keydown", function (e) {
-  console.log("Key pressed:", e.key);
-
-  if (e.key === "Escape") {
-    console.log("ESC pressed");
-/*
-    const overlay = document.querySelector(".centerDIV");
-    if (overlay.classList.contains("showRecipe")) {
-      overlay.classList.remove("showRecipe");
-      overlay.style.display = "none";
-    }
-*/
-    mealDetailsContent.parentElement.classList.remove("showRecipe");
-    document.getElementsByClassName("centerDIV")[0].style.display = 'none';
-  }
-});
 
 document.addEventListener("DOMContentLoaded", () => {
   const themeToggle = document.getElementById("theme-toggle");
@@ -450,6 +502,7 @@ document.addEventListener("DOMContentLoaded", () => {
       localStorage.setItem("theme", "light");
     }
   });
+  loadRandomMeals();
 });
 
 
@@ -464,3 +517,32 @@ function showToast(message) {
   }, 2000);
 }
 
+function closeModal() {
+  const overlay = document.querySelector(".centerDIV");
+  const modal = mealDetailsContent.parentElement;
+
+  overlay.classList.remove("showRecipe");
+  overlay.classList.add("hideRecipe");
+
+  // wait for fade-out to finish, then hide
+  setTimeout(() => {
+    overlay.classList.remove("hideRecipe");
+    overlay.style.display = 'none';
+    modal.classList.remove("showRecipe"); // also remove modal class
+  }, 300); // match CSS transition time
+}
+
+function loadRandomMeals(count = 9) {
+  let promises = [];
+  for (let i = 0; i < count; i++) {
+    promises.push(fetch("https://www.themealdb.com/api/json/v1/1/random.php").then(res => res.json()));
+  }
+
+  Promise.all(promises).then(results => {
+    const meals = results.map(result => result.meals[0]);
+    const data = { meals };
+    lastMealData = data;
+    mealList.innerHTML = createMealHTML(data);
+    document.getElementById("result-label").textContent = "Random Dishes for Inspiration";
+  });
+}

@@ -1,3 +1,37 @@
+const countryCodeMap = {
+  "American": "us",
+  "British": "gb",
+  "Canadian": "ca",
+  "Chinese": "cn",
+  "Croatian": "hr",
+  "Dutch": "nl",
+  "Egyptian": "eg",
+  "Filipino": "ph",
+  "French": "fr",
+  "Greek": "gr",
+  "Indian": "in",
+  "Irish": "ie",
+  "Italian": "it",
+  "Jamaican": "jm",
+  "Japanese": "jp",
+  "Kenyan": "ke",
+  "Malaysian": "my",
+  "Mexican": "mx",
+  "Moroccan": "ma",
+  "Polish": "pl",
+  "Portuguese": "pt",
+  "Russian": "ru",
+  "Spanish": "es",
+  "Thai": "th",
+  "Tunisian": "tn",
+  "Turkish": "tr",
+  "Ukrainian": "ua",
+  "Uruguayan": "uy",
+  "Vietnamese": "vn"
+};
+
+
+
 let lastMealData = null;
 
 const searchBtn = document.getElementById("search-btn");
@@ -167,9 +201,12 @@ function getAreaList() {
             let html = "";
             if(data.meals) {
                 data.meals.forEach(area => {
+                    const code = countryCodeMap[area.strArea] || "";
+                    const flag = code ? `<img src="https://flagcdn.com/w40/${code}.png" alt="${area.strArea} flag" class="flag-icon">` : "";
                     html += `
                         <div class="meal-item" style="padding-top:1rem;">
                             <div class="area-name" data-id="${area.strArea}">
+                                ${flag}
                                 <h3>${area.strArea}</h3>
                                 <a href="#" class="each-area-btn show-btn">Show Recipes</a>
                             </div>
@@ -242,7 +279,7 @@ function getIngredientList() {
 
 
                     html += `
-                        <div class="meal-item">
+                        <div class="">
                                 <a href="#" class="each-ingredient-btn" data-ingredient="${ingredient.strIngredient}">
                                   <div class="ingredient-name" data-id="${ingredient.strIngredient}">
                                   <h3>${ingredient.strIngredient}</h3>
@@ -274,9 +311,13 @@ function getMealsbyIngredient(e) {
             .then(response => response.json())
             .then(data => {
             lastMealData = data; // <--- store data
+
+            document.querySelector(".letter-bar-wrapper").style.display = "none";
+
             if (!data.meals) {
               mealList.innerHTML = `<p class="notFound">Sorry, no items found</p>`;
             } else {
+
             mealList.innerHTML = createMealHTML(data);
           }
 

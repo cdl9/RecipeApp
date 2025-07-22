@@ -16,7 +16,9 @@
     --deep-lemon: #ffbe35;
 
     --bg-color: #fff;
+    --search-bar:#fff;
     --text-color: #222;
+    --search-color: var(--tenne-tawny);
     --card-bg:#f4f4f4;
     --accent: var(--deep-lemon);
 
@@ -32,7 +34,9 @@ body{
 }
 body.dark-mode{
     --bg-color:#121212;
+    --search-bar: #1e1e1e;
     --text-color: #e0e0e0;
+    --search-color: var(--frosting);
     --card-bg: #1e1e1e;
     --accent: var(--tenne-tawny);
     --modalCardBg: rgba(18, 18, 18, 0.75);
@@ -56,7 +60,12 @@ html {
     color: var(--text-color);
     text-decoration: none;
 }
-
+.each-ingredient-btn:hover {
+  background: var(--tenne-tawny-light);
+  color:white;
+  transform: scale(1.02);
+  transition: all 0.2s ease;
+}
 .text{
     opacity: 0.8;
 }
@@ -90,15 +99,17 @@ html {
 .container{
     min-height: 100vh;
 }
+
+.flag-icon {
+  height: 30px;;
+  border-radius: 4px;
+}
 .ingredient-results {
   width: 100%;
   display: block;
 }
 
-.ingredient-group {
-  width: 100%;
-  display: block;
-}
+
 .letter-bar {
   display: flex;
   flex-wrap: wrap;
@@ -108,19 +119,15 @@ html {
   padding: 0.5rem;
   background: var(--card-bg);
   border-radius: 10px;
-  
+  overflow-x:auto;
+  white-space: nowrap;
 }
 .letter-bar-wrapper {
   width: 100%;
-  //margin-bottom: 1rem;
   display: none;
   position:sticky;
   z-index: 10;
   top:0;
-  //padding: 0.5rem 1rem;
-  //border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-  //box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-  
 }
 .letter-link{
   text-decoration: none;
@@ -129,6 +136,7 @@ html {
   font-size: 1.1rem;
   padding: 0.3rem 0.6rem;
   transition: background 0.2s;
+  display:inline-block;
 }
 .letter-link:hover, .highlight-letter {
   background: var(--tenne-tawny);
@@ -171,12 +179,13 @@ html {
     font-family: inherit;
     outline: 0;
     border: 1px solid var(--tenne-tawny);
-    color: var(--tenne-tawny);
+    color: var(--search-color);
     border-top-left-radius: 2rem;
     border-bottom-left-radius: 2rem;
+    background-color: var(--search-bar);
 }
 .search-control::placeholder{
-    color: var(--tenne-tawny);
+    color: var(--search-color);
 }
 .search-btn{
     width: 55px;
@@ -394,6 +403,7 @@ html {
     background-color: var(--tenne-tawny-light);
     text-align: left;
     width:100%;
+    border-radius: 0.2rem;
 }
 
 .recipe-category{
